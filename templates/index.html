@@ -24,16 +24,16 @@
         --primary-dark: #37423D;
         --primary-light: #7E8D86;
         --secondary: #8C7A6B;      /* Warm Taupe */
-        
+
         --bg: #F9F8F6;             /* Alabaster / Sand */
         --surface: #FFFFFF;        /* Pure White */
         --surface-hover: #F2EFEA;  /* Soft Off-White */
         --border: #E8E4DF;         /* Warm Light Gray */
-        
+
         --text-primary: #2C2A29;   /* Soft Black */
         --text-secondary: #75716E; /* Medium Warm Gray */
         --text-muted: #767069;     /* Darkened for WCAG AA Contrast */
-        
+
         --success: #4E6E5D;
         --warning: #B38D5A;
         --error: #A85A52;
@@ -555,7 +555,7 @@
       .bubble.ai a:hover {
         color: var(--primary-dark);
       }
-      
+
       .typing-cursor {
         display: inline-block;
         width: 2px;
@@ -618,7 +618,7 @@
         height: 100%;
         object-fit: cover;
       }
-      
+
       .input-wrapper {
         flex: 1;
         background: var(--bg);
@@ -679,6 +679,15 @@
         background: var(--border);
         color: var(--text-muted);
         cursor: not-allowed;
+      }
+      .send-btn.stop-active {
+        background: var(--error) !important;
+        color: white !important;
+        cursor: pointer !important;
+      }
+      .send-btn.stop-active:hover {
+        background: var(--error) !important;
+        filter: brightness(0.9);
       }
 
       @keyframes blink {
@@ -752,7 +761,7 @@
 
       <div class="layout-main">
         <div class="chat-section">
-          
+
           <input type="file" id="partnerPhotoInput" accept="image/*" style="display: none" onchange="setPartnerPhoto(event)" />
           <input type="file" id="myPhotoInput" accept="image/*" style="display: none" onchange="setMyPhoto(event)" />
 
@@ -764,7 +773,7 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
               </div>
             </div>
-            
+
             <div class="header-info">
               <div class="header-name">Legal Assistant</div>
               <div class="header-status"><span class="sdot"></span> Online</div>
@@ -812,7 +821,7 @@
           <div class="my-av-btn" id="myAvatarBtn" onclick="document.getElementById('myPhotoInput').click()" title="Profile Photo">
             <span id="myInitials">YOU</span>
           </div>
-          
+
           <div class="input-wrapper">
             <textarea
               class="chat-input"
@@ -871,11 +880,12 @@
         e.stopPropagation();
         document.getElementById("customizeDropdown").classList.toggle("open");
       }
-      
+
       document.addEventListener("click", () => {
         document.getElementById("customizeDropdown").classList.remove("open");
       });
 
+      // ── Zoom feature (from version 2) ──
       let currentZoom = 1;
       function zoomChat(dir) {
         currentZoom += dir * 0.1;
@@ -902,7 +912,7 @@
         av.innerHTML = partnerPhotoUrl ? '<img src="' + partnerPhotoUrl + '" alt="AI">' : "<span>AI</span>";
         return av;
       }
-      
+
       function makeMyAv(id) {
         const av = document.createElement("div");
         av.className = "msg-av";
@@ -919,7 +929,7 @@
         const bubble = document.createElement("div");
         bubble.className = "bubble " + (type || side);
         bubble.innerHTML = text; // allow HTML like <strong>
-        
+
         if (side === "me") {
           row.appendChild(bubble);
           row.appendChild(makeMyAv(msgCounter));
@@ -927,7 +937,7 @@
           row.appendChild(makePartnerAv(msgCounter));
           row.appendChild(bubble);
         }
-        
+
         body.appendChild(row);
         body.scrollTop = body.scrollHeight;
         return bubble;
@@ -955,15 +965,35 @@
 
       function typewrite(bubble, htmlContent, done) {
         // since we are writing HTML now, typing out char-by-char directly into innerHTML ruins tags.
-        // For simplicity and to support the <strong> label, we will just dump the HTML instantly 
-        // without the typewriter effect, or we could strip the tags. Let's just set it instantly
-        // to be clean and readable for now.
+        // For simplicity and to support markdown tags, we just dump the HTML instantly.
         bubble.innerHTML = htmlContent;
         if (done) setTimeout(done, 100);
       }
 
+      // ── Stop/Abort feature (from version 1) ──
+      let currentAbortController = null;
+
+      function stopChatMsg() {
+        if (currentAbortController) {
+          currentAbortController.abort();
+        }
+      }
+
+      function resetSendBtn() {
+        isProcessing = false;
+        currentAbortController = null;
+        const sendBtn = document.getElementById("sendBtn");
+        sendBtn.classList.remove("stop-active");
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>';
+        sendBtn.title = "Send";
+      }
+
       async function sendChatMsg() {
-        if (isProcessing) return;
+        if (isProcessing) {
+          stopChatMsg();
+          return;
+        }
         const input = document.getElementById("chatMsgInput");
         const text = input.value.trim();
         if (!text) return;
@@ -973,9 +1003,13 @@
         input.style.height = "auto";
 
         isProcessing = true;
+        currentAbortController = new AbortController();
+        const { signal } = currentAbortController;
+
         const sendBtn = document.getElementById("sendBtn");
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = '<span style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span>';
+        sendBtn.classList.add("stop-active");
+        sendBtn.title = "Stop";
+        sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"></rect></svg>';
 
         showTyping();
 
@@ -984,9 +1018,10 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: text }),
+            signal: signal,
           });
           const data = await res.json();
-          
+
           const isNoAnswer = (text) => {
             if (!text) return true;
             const lower = text.toLowerCase();
@@ -1003,7 +1038,7 @@
           const hasCult = !isNoAnswer(data.answer_culture);
 
           let combinedMarkdown = "";
-          
+
           if (hasLaw && hasCult) {
              combinedMarkdown = "## ⚖️ Legal Perspective\n\n" + data.answer_law +
                                 "\n\n---\n\n## 🏛️ Cultural Perspective\n\n" + data.answer_culture;
@@ -1019,18 +1054,18 @@
 
           hideTyping();
           const bubble = appendBubble("", "them", "ai");
-          
+
           typewrite(bubble, combinedHtml, () => {
-            isProcessing = false;
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>';
+            resetSendBtn();
           });
         } catch (err) {
           hideTyping();
-          appendBubble("Sorry, there was an error communicating with the server.", "them", "ai");
-          isProcessing = false;
-          sendBtn.disabled = false;
-          sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>';
+          if (err.name === "AbortError") {
+            appendBubble("Generation stopped.", "them", "ai");
+          } else {
+            appendBubble("Sorry, there was an error communicating with the server.", "them", "ai");
+          }
+          resetSendBtn();
         }
       }
 
@@ -1042,12 +1077,12 @@
             const rect = b.getBoundingClientRect();
             // Calculate relative to bubble to save on off-screen updates
             const isNear = (
-              e.clientX >= rect.left - 150 && 
-              e.clientX <= rect.right + 150 && 
-              e.clientY >= rect.top - 150 && 
+              e.clientX >= rect.left - 150 &&
+              e.clientX <= rect.right + 150 &&
+              e.clientY >= rect.top - 150 &&
               e.clientY <= rect.bottom + 150
             );
-            
+
             if (isNear) {
               const x = e.clientX - rect.left;
               const y = e.clientY - rect.top;

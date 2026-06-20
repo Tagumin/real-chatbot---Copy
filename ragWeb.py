@@ -12,9 +12,9 @@ from vector import retriever_law, retriever_culture
 # ─────────────────────────────
 # CONFIG
 # ─────────────────────────────
-LLM_MODEL = "qwen3:4b"
+LLM_MODEL = "qwen3:4b"          # ganti ke "qwen2.5:7b" jika ingin pakai model versi pertama
 TEMPERATURE = 0.1
-MAX_CONTEXT_CHARS = 16000
+MAX_CONTEXT_CHARS = 16000        # diambil dari versi qwen3 (lebih besar)
 
 DEBUG = True
 
@@ -25,15 +25,17 @@ DEBUG = True
 llm = OllamaLLM(model=LLM_MODEL, temperature=TEMPERATURE)
 
 PROMPT = """
-You are a professional Indonesian Legal Assistant. 
-Answer the user's question using ONLY the information provided in the CONTEXT below.
+You are an Indonesian Legal Assistant. Answer using the KNOWLEDGE below.
 
 RULES:
-1. If the CONTEXT contains the answer, explain it clearly and professionally. Use Markdown formatting.
-2. If the CONTEXT does NOT contain the answer, or if the context is empty, you MUST reply EXACTLY with: "I do not have sufficient information regarding this matter to provide an accurate answer."
-3. Never use phrases like "based on the context", "in the provided text", or "according to the document". Act as if you just know the law natively.
+1. Use the KNOWLEDGE as the basis for your answer. If it partially covers the topic, explain what it does say, even if not a perfect match to the question's exact wording.
+2. Never mention "context", "dataset", "source", or similar terms — speak as if the knowledge is your own.
+3. Only reply EXACTLY "I do not have sufficient information regarding this matter to provide an accurate answer." if KNOWLEDGE is completely empty or entirely unrelated to the question's topic.
+4. For non-legal questions (greetings, thanks), respond briefly and politely.
+5. Format in Markdown: direct answer first, **bold** key terms, use lists/headings when helpful, short paragraphs.
+6. No disclaimers or extra commentary — be concise and factual.
 
-CONTEXT:
+KNOWLEDGE:
 {context}
 
 QUESTION:
@@ -91,8 +93,7 @@ def debug_print(title, content):
 
 def debug_print_docs(docs, label: str):
     """Shared debug printer for a list of retrieved docs (used for both
-    LAW and CULTURE results) -- replaces the two near-identical loops
-    that used to exist in ask_question()."""
+    LAW and CULTURE results)."""
     if not DEBUG or not docs:
         return
 
@@ -164,45 +165,49 @@ def ask_question(question: str):
         debug_print("CLEANED ANSWER (CULTURE)", answer_culture)
 
         # ── RESULT ──
+        time_taken = (datetime.now() - start).total_seconds()
+        print(f"\n⏱️ Time taken: {time_taken:.2f} seconds\n")
         return {
             "answer_law": answer_law,
             "answer_culture": answer_culture,
             "docs_law": len(docs_law),
             "docs_culture": len(docs_culture),
-            "time": (datetime.now() - start).total_seconds()
+            "time": time_taken
         }
 
     except Exception as e:
         print("\n❌ ERROR OCCURRED")
         traceback.print_exc()
 
+        time_taken = (datetime.now() - start).total_seconds()
+        print(f"\n⏱️ Time taken (with error): {time_taken:.2f} seconds\n")
         return {
             "error": str(e),
             "answer_law": "System error occurred",
             "answer_culture": "System error occurred",
-            "time": (datetime.now() - start).total_seconds()
+            "time": time_taken
         }
 
 
-# # ─────────────────────────────
-# # CLI TEST MODE
-# # ─────────────────────────────
-# if __name__ == "__main__":
-#     print("\n🚀 RAG DEBUG MODE")
-#     print("Type 'exit' to quit\n")
+# ─────────────────────────────
+# CLI TEST MODE
+# ─────────────────────────────
+if __name__ == "__main__":
+    print("\n🚀 RAG DEBUG MODE")
+    print("Type 'exit' to quit\n")
 
-#     while True:
-#         q = input("Ask > ")
+    while True:
+        q = input("Ask > ")
 
-#         if q.lower() == "exit":
-#             break
+        if q.lower() == "exit":
+            break
 
-#         result = ask_question(q)
+        result = ask_question(q)
 
-#         print("\n🧠 FINAL ANSWER")
-#         print("=" * 60)
-#         print("LAW PERSPECTIVE:")
-#         print(result.get("answer_law", result.get("error")))
-#         print("\nCULTURE PERSPECTIVE:")
-#         print(result.get("answer_culture", ""))
-#         print("=" * 60)
+        print("\n🧠 FINAL ANSWER")
+        print("=" * 60)
+        print("LAW PERSPECTIVE:")
+        print(result.get("answer_law", result.get("error")))
+        print("\nCULTURE PERSPECTIVE:")
+        print(result.get("answer_culture", ""))
+        print("=" * 60)
