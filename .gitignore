@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+evaluate.py
+chunk/
+# Node.js
+node_modules/
+.agents
+.impeccable
+# Logs & temp
+*.log
+temp/
+outputs/
+*.md
+# OS junk
+.DS_Store
+Thumbs.db
+
+evaluator.py
+evaluator.json
+final_results.csv
