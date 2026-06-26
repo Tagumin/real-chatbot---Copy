@@ -2,38 +2,55 @@ import re
 import traceback
 from datetime import datetime
 
-from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import OllamaLLM
+from dotenv import load_dotenv
+import os
 from vector import retriever_law, retriever_culture
 
 
 # ─────────────────────────────
 # CONFIG
 # ─────────────────────────────
-LLM_MODEL = "qwen3:4b"          # ganti ke "qwen2.5:7b" jika ingin pakai model versi pertama
-TEMPERATURE = 0.1
-MAX_CONTEXT_CHARS = 16000        # diambil dari versi qwen3 (lebih besar)
+load_dotenv()
 
-DEBUG = True
+GEMINI_MODEL      = "gemini-3.1-flash-lite"
+OLLAMA_MODEL      = "qwen2.5:3b"
+TEMPERATURE       = 0.1
+MAX_CONTEXT_CHARS = 16000
 
 
 # ─────────────────────────────
-# LLM
+# PROMPTS
 # ─────────────────────────────
-llm = OllamaLLM(model=LLM_MODEL, temperature=TEMPERATURE)
+TRANSLATE_PROMPT = """
+Translate the following question to English.
+Return ONLY the translated text, nothing else — no explanation, no quotes.
+
+QUESTION:
+{question}
+
+TRANSLATION:
+"""
 
 PROMPT = """
 You are an Indonesian Legal Assistant. Answer using the KNOWLEDGE below.
 
 RULES:
-1. Use the KNOWLEDGE as the basis for your answer. If it partially covers the topic, explain what it does say, even if not a perfect match to the question's exact wording.
-2. Never mention "context", "dataset", "source", or similar terms — speak as if the knowledge is your own.
-3. Only reply EXACTLY "I do not have sufficient information regarding this matter to provide an accurate answer." if KNOWLEDGE is completely empty or entirely unrelated to the question's topic.
+1. Use the KNOWLEDGE as the basis for your answer. If it partially covers the topic,
+   explain what it does say, even if not a perfect match to the question's exact wording.
+2. Never mention "context", "dataset", "source", or similar terms.
+3. Only reply EXACTLY "I do not have sufficient information regarding this matter to provide
+   an accurate answer." if KNOWLEDGE is completely empty or entirely unrelated to the question.
 4. For non-legal questions (greetings, thanks), respond briefly and politely.
-5. Format in Markdown: direct answer first, **bold** key terms, use lists/headings when helpful, short paragraphs.
+5. Format in Markdown: direct answer first, **bold** key terms, use lists/headings when helpful.
 6. No disclaimers or extra commentary — be concise and factual.
+7. STRICTLY reply in the same language as the QUESTION.
+   - If QUESTION is in English → reply in English.
+   - If QUESTION is in Indonesian → reply in Indonesian.
+   - IGNORE the language of KNOWLEDGE completely when deciding your response language.
 
 KNOWLEDGE:
 {context}
@@ -43,26 +60,51 @@ QUESTION:
 
 ANSWER:
 """
-prompt = ChatPromptTemplate.from_template(PROMPT)
-chain = prompt | llm | StrOutputParser()
+
+translate_prompt_template = ChatPromptTemplate.from_template(TRANSLATE_PROMPT)
+prompt_template           = ChatPromptTemplate.from_template(PROMPT)
+
+
+# ─────────────────────────────
+# LLM & CHAINS — Gemini, fallback ke Ollama
+# ─────────────────────────────
+def build_chains(llm):
+    parser = StrOutputParser()
+    return (
+        prompt_template           | llm | parser,
+        translate_prompt_template | llm | parser,
+    )
+
+try:
+    llm = ChatGoogleGenerativeAI(
+        model=GEMINI_MODEL,
+        temperature=TEMPERATURE,
+        google_api_key=os.getenv("GEMINI_API_KEY"),
+    )
+    answer_chain, translate_chain = build_chains(llm)
+    active_llm = "gemini"
+    print("Using Gemini.")
+except Exception as e:
+    print(f"Gemini failed ({e}). Switching to Ollama...")
+    llm = OllamaLLM(model=OLLAMA_MODEL, temperature=TEMPERATURE)
+    answer_chain, translate_chain = build_chains(llm)
+    active_llm = "ollama"
 
 
 # ─────────────────────────────
 # CONTEXT BUILDER
 # ─────────────────────────────
-def build_context(docs):
+def build_context(docs) -> str:
     parts = []
-
     for doc in docs:
-        source = doc.metadata.get("source", "Unknown Source")
+        source  = doc.metadata.get("source", "Unknown Source")
         article = doc.metadata.get("article", "")
 
         if not article or article == "-":
-            match = re.search(r'Article\s+(\d+[A-Za-z]*)', doc.page_content)
+            match   = re.search(r'Article\s+(\d+[A-Za-z]*)', doc.page_content)
             article = f"Article {match.group(1)}" if match else "Unknown Article"
 
-        content = doc.page_content.strip()
-        parts.append(f"Source: {source}\n{article}\n{content}")
+        parts.append(f"Source: {source}\n{article}\n{doc.page_content.strip()}")
 
     return "\n\n---\n\n".join(parts)[:MAX_CONTEXT_CHARS]
 
@@ -70,144 +112,70 @@ def build_context(docs):
 # ─────────────────────────────
 # CLEAN OUTPUT
 # ─────────────────────────────
-def clean(text: str):
+def clean(text: str) -> str:
     if not text:
         return ""
-
-    # Strip any stray <tool_call>...</tool_call> blocks the model might emit.
     text = re.sub(r"<tool_call>.*?</tool_call>", "", text, flags=re.DOTALL)
     return text.strip()
 
 
 # ─────────────────────────────
-# DEBUG PRINT HELPERS
+# RETRIEVE DOCS
 # ─────────────────────────────
-def debug_print(title, content):
-    if not DEBUG:
-        return
-    print(f"\n🟡 {title}")
-    print("-" * 50)
-    print(content)
-    print("-" * 50)
-
-
-def debug_print_docs(docs, label: str):
-    """Shared debug printer for a list of retrieved docs (used for both
-    LAW and CULTURE results)."""
-    if not DEBUG or not docs:
-        return
-
-    for i, d in enumerate(docs):
-        print("\n" + "=" * 80)
-        print(f"DOC {i + 1} ({label})")
-        print("=" * 80)
-        print(f"Domain       : {d.metadata.get('domain', 'N/A')}")
-        print(f"Rerank Rank  : {d.metadata.get('rerank_rank', 'N/A')}")
-        print(f"Rerank Score : {d.metadata.get('rerank_score', 'N/A')}")
-        print(f"BM25 Score   : {d.metadata.get('bm25_score', 'N/A')}")
-        print("\nContent:")
-        print(d.page_content[:300])
-        print("=" * 80)
-
-
 def retrieve_docs(retriever, question: str):
-    """Works whether the retriever exposes .invoke() (current LangChain API)
-    or the older .get_relevant_documents()."""
     if hasattr(retriever, "invoke"):
         return retriever.invoke(question)
     return retriever.get_relevant_documents(question)
 
 
 # ─────────────────────────────
+# TRANSLATE QUESTION TO ENGLISH
+# ─────────────────────────────
+def translate_to_english(question: str) -> str:
+    translated = translate_chain.invoke({"question": question})
+    return clean(translated)
+
+
+# ─────────────────────────────
 # MAIN RAG FUNCTION
 # ─────────────────────────────
-def ask_question(question: str):
+def ask_question(question: str) -> dict:
     start = datetime.now()
-
     try:
-        debug_print("QUESTION", question)
+        query_for_retrieval = translate_to_english(question)
 
-        # ── RETRIEVAL (both domains, always) ──
-        docs_law = retrieve_docs(retriever_law, question)
-        docs_culture = retrieve_docs(retriever_culture, question)
+        docs_law     = retrieve_docs(retriever_law,     query_for_retrieval)
+        docs_culture = retrieve_docs(retriever_culture, query_for_retrieval)
 
-        debug_print("DOCS FOUND (LAW)", len(docs_law))
-        debug_print("DOCS FOUND (CULTURE)", len(docs_culture))
-
-        debug_print_docs(docs_law, "LAW")
-        debug_print_docs(docs_culture, "CULTURE")
-
-        # ── CONTEXT ──
-        context_law = build_context(docs_law)
+        context_law     = build_context(docs_law)
         context_culture = build_context(docs_culture)
-        debug_print("CONTEXT PREVIEW (LAW)", context_law[:500])
-        debug_print("CONTEXT PREVIEW (CULTURE)", context_culture[:500])
 
-        # ── LLM ──
-        if docs_law:
-            raw_law = chain.invoke({"context": context_law, "question": question})
-        else:
-            raw_law = "I do not have the specific regulations regarding this available at this time."
+        raw_law = (
+            answer_chain.invoke({"context": context_law,     "question": question})
+            if docs_law else "No legal information is currently available."
+        )
+        raw_culture = (
+            answer_chain.invoke({"context": context_culture, "question": question})
+            if docs_culture else "No cultural information is currently available."
+        )
 
-        if docs_culture:
-            raw_culture = chain.invoke({"context": context_culture, "question": question})
-        else:
-            raw_culture = "I do not have specific cultural information regarding this available at this time."
-
-        debug_print("RAW LLM OUTPUT (LAW)", raw_law)
-        debug_print("RAW LLM OUTPUT (CULTURE)", raw_culture)
-
-        # ── PROCESSING ──
-        answer_law = clean(raw_law)
-        answer_culture = clean(raw_culture)
-
-        debug_print("CLEANED ANSWER (LAW)", answer_law)
-        debug_print("CLEANED ANSWER (CULTURE)", answer_culture)
-
-        # ── RESULT ──
         time_taken = (datetime.now() - start).total_seconds()
-        print(f"\n⏱️ Time taken: {time_taken:.2f} seconds\n")
         return {
-            "answer_law": answer_law,
-            "answer_culture": answer_culture,
-            "docs_law": len(docs_law),
-            "docs_culture": len(docs_culture),
-            "time": time_taken
+            "answer_law":     clean(raw_law),
+            "answer_culture": clean(raw_culture),
+            "docs_law":       len(docs_law),
+            "docs_culture":   len(docs_culture),
+            "llm_used":       active_llm,
+            "time":           time_taken,
         }
 
     except Exception as e:
-        print("\n❌ ERROR OCCURRED")
         traceback.print_exc()
 
-        time_taken = (datetime.now() - start).total_seconds()
-        print(f"\n⏱️ Time taken (with error): {time_taken:.2f} seconds\n")
         return {
-            "error": str(e),
-            "answer_law": "System error occurred",
-            "answer_culture": "System error occurred",
-            "time": time_taken
+            "error":          str(e),
+            "answer_law":     "A system error occurred.",
+            "answer_culture": "A system error occurred.",
+            "llm_used":       active_llm,
+            "time":           (datetime.now() - start).total_seconds(),
         }
-
-
-# ─────────────────────────────
-# CLI TEST MODE
-# ─────────────────────────────
-if __name__ == "__main__":
-    print("\n🚀 RAG DEBUG MODE")
-    print("Type 'exit' to quit\n")
-
-    while True:
-        q = input("Ask > ")
-
-        if q.lower() == "exit":
-            break
-
-        result = ask_question(q)
-
-        print("\n🧠 FINAL ANSWER")
-        print("=" * 60)
-        print("LAW PERSPECTIVE:")
-        print(result.get("answer_law", result.get("error")))
-        print("\nCULTURE PERSPECTIVE:")
-        print(result.get("answer_culture", ""))
-        print("=" * 60)

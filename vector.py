@@ -229,42 +229,22 @@ class Reranker:
 # ─────────────────────────────
 # SHARED HELPER: retrieve + dedup (used by DomainRetriever & HybridRetriever)
 # ─────────────────────────────
-def retrieve_candidates(
-    vectorstore: Chroma,
-    bm25: BM25Retriever,
-    query: str,
-    domain: str
-) -> Dict[str, Document]:
-    """
-    Fetch candidate documents from vector search + BM25 for a single domain,
-    then dedup them by canonical_id. Returned as a dict {canonical_id: Document}
-    so results can easily be merged across domains (used by HybridRetriever)
-    without rewriting the dedup logic.
-
-    Both the vector score and the BM25 score are stored in metadata
-    ("vector_score" / "bm25_score") so they can be inspected later,
-    e.g. in a debug print of retrieval results.
-
-    Note: Chroma's similarity_search_with_score returns a DISTANCE-like
-    value depending on the collection's configured distance function
-    (commonly cosine distance) -> lower vector_score means MORE similar,
-    unlike rerank_score where higher is better.
-    """
+def retrieve_candidates(vectorstore, bm25, query,domain):
+    #dense vector search
     vec_results = vectorstore.similarity_search_with_score(query, k=VECTOR_TOP_K)
-
     vec_docs = []
     for doc, score in vec_results:
         doc.metadata["vector_score"] = float(score)
         vec_docs.append(doc)
 
+    #sparse BM25 search
     bm25_docs = bm25.invoke(query)
-
-    candidates: Dict[str, Document] = {}
-
+    candidates= {}
     for d in vec_docs + bm25_docs:
         d.metadata.setdefault("domain", domain)
         canonical_id = get_canonical_id(d)
 
+        #deduplication: if the same canonical_id is found from both vector and BM25, merge scores
         if canonical_id not in candidates:
             candidates[canonical_id] = d
         else:
