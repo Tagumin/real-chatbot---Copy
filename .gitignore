@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 venv/
 .env
-evaluate.py
 chunk/
 # Node.js
 node_modules/
@@ -19,6 +18,6 @@ temp_critique.md
 .DS_Store
 Thumbs.db
 rag.py
-evaluator.py
+
 evaluator.json
 final_results.csv
