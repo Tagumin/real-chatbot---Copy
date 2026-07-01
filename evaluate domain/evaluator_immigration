@@ -1,0 +1,112 @@
+{
+  "queries": [
+    "What is the minimum passport validity required to enter Indonesia?",
+    "Who is required to have a valid visa to enter Indonesia?",
+    "Where must every traveler undergo immigration checks upon arrival?",
+    "Why can an immigration officer search a traveler's luggage or person?",
+    "What are the four main types of visas available under Indonesian law?",
+    "How is a 'Visit Visa' defined in terms of its allowed purposes?",
+    "When can a 'Visa on Arrival' be issued at an immigration checkpoint?",
+    "What are the common reasons for an Indonesian visa application to be denied?",
+    "Who is officially exempt from the requirement to have a visa?",
+    "What is the primary obligation of any foreigner staying in Indonesian territory?",
+    "How does a 'Visit Stay Permit' officially end or expire?",
+    "Why must a foreigner report a change of address to the immigration office?",
+    "What happens if a foreigner refuses to show their travel documents to an officer?",
+    "Who is responsible for providing data on foreigners staying at a hotel or lodging?",
+    "What kinds of 'Administrative Actions' can immigration take against violators?",
+    "How is a foreigner penalized for overstaying their permit for less than 60 days?",
+    "What is the legal consequence of overstaying a permit for more than 60 days?",
+    "Where are foreigners held if they are placed under immigration detention?",
+    "How long can a foreigner be detained if deportation cannot be immediate?",
+    "What is the maximum prison sentence for entering Indonesia without inspection?",
+    "What is the fine for a foreigner who fails to report a change in their civil status?",
+    "What is the criminal penalty for staying in Indonesia without any valid visa?",
+    "Why is it illegal for a tourist to engage in work while on a visit permit?",
+    "What is the punishment for providing false information to obtain an Indonesian visa?",
+    "How does the law punish a foreigner for entering a restricted area without permission?"
+  ],
+  "relevance": {
+    "What is the passport validity required to enter Indonesia?": [
+      "immigration_Article_8"
+    ],
+    "Who is required to have a valid visa to enter Indonesia?": [
+      "immigration_Article_8"
+    ],
+    "Where must every traveler undergo immigration checks upon arrival?": [
+      "immigration_Article_9"
+    ],
+    "Why can an immigration officer search a traveler's luggage or person?": [
+      "immigration_Article_9"
+    ],
+    "What are the four main types of visas available under Indonesian law?": [
+      "immigration_Article_34"
+    ],
+    "How is a 'Visit Visa' defined in terms of its allowed purposes?": [
+      "immigration_Article_38"
+    ],
+    "When can a 'Visa on Arrival' be issued at an immigration checkpoint?": [
+      "immigration_Article_41"
+    ],
+    "What are the common reasons for an Indonesian visa application to be denied?": [
+      "immigration_Article_42"
+    ],
+    "Who is officially exempt from the requirement to have a visa?": [
+      "immigration_Article_43"
+    ],
+    "What is the primary obligation of any foreigner staying in Indonesian territory?": [
+      "immigration_Article_48"
+    ],
+    "How does a 'Visit Stay Permit' officially end or expire?": [
+      "immigration_Article_51"
+    ],
+    "Why must a foreigner report a change of address to the immigration office?": [
+      "immigration_Article_71"
+    ],
+    "What happens if a foreigner refuses to show their travel documents to an officer?": [
+      "immigration_Article_71",
+      "immigration_Article_116"
+    ],
+    "Who is responsible for providing data on foreigners staying at a hotel or lodging?": [
+      "immigration_Article_72",
+      "immigration_Article_117"
+    ],
+    "What kinds of 'Administrative Actions' can immigration take against violators?": [
+      "immigration_Article_75"
+    ],
+    "How is a foreigner penalized for overstaying their permit for less than 60 days?": [
+      "immigration_Article_78"
+    ],
+    "What is the legal consequence of overstaying a permit for more than 60 days?": [
+      "immigration_Article_78"
+    ],
+    "Where are foreigners held if they are placed under immigration detention?": [
+      "immigration_Article_83",
+      "immigration_Article_1"
+    ],
+    "How long can a foreigner be detained if deportation cannot be immediate?": [
+      "immigration_Article_85"
+    ],
+    "What is the maximum prison sentence for entering Indonesia without inspection?": [
+      "immigration_Article_113"
+    ],
+    "What is the fine for a foreigner who fails to report a change in their civil status?": [
+      "immigration_Article_116",
+      "immigration_Article_71"
+    ],
+    "What is the criminal penalty for staying in Indonesia without any valid visa?": [
+      "immigration_Article_119",
+      "immigration_Article_8"
+    ],
+    "Why is it illegal for a tourist to engage in work while on a visit permit?": [
+      "immigration_Article_122"
+    ],
+    "What is the punishment for providing false information to obtain an Indonesian visa?": [
+      "immigration_Article_123"
+    ],
+    "How does the law punish a foreigner for entering a restricted area without permission?": [
+      "immigration_Article_125",
+      "immigration_Article_48"
+    ]
+  }
+}

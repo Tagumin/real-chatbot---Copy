@@ -680,15 +680,7 @@
         color: var(--text-muted);
         cursor: not-allowed;
       }
-      .send-btn.stop-active {
-        background: var(--error) !important;
-        color: white !important;
-        cursor: pointer !important;
-      }
-      .send-btn.stop-active:hover {
-        background: var(--error) !important;
-        filter: brightness(0.9);
-      }
+
 
       @keyframes blink {
         0%, 100% { opacity: 1; }
@@ -970,30 +962,16 @@
         if (done) setTimeout(done, 100);
       }
 
-      // ── Stop/Abort feature (from version 1) ──
-      let currentAbortController = null;
-
-      function stopChatMsg() {
-        if (currentAbortController) {
-          currentAbortController.abort();
-        }
-      }
-
       function resetSendBtn() {
         isProcessing = false;
-        currentAbortController = null;
         const sendBtn = document.getElementById("sendBtn");
-        sendBtn.classList.remove("stop-active");
         sendBtn.disabled = false;
         sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>';
         sendBtn.title = "Send";
       }
 
       async function sendChatMsg() {
-        if (isProcessing) {
-          stopChatMsg();
-          return;
-        }
+        if (isProcessing) return;
         const input = document.getElementById("chatMsgInput");
         const text = input.value.trim();
         if (!text) return;
@@ -1003,13 +981,9 @@
         input.style.height = "auto";
 
         isProcessing = true;
-        currentAbortController = new AbortController();
-        const { signal } = currentAbortController;
 
         const sendBtn = document.getElementById("sendBtn");
-        sendBtn.classList.add("stop-active");
-        sendBtn.title = "Stop";
-        sendBtn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"></rect></svg>';
+        sendBtn.disabled = true;
 
         showTyping();
 
@@ -1018,7 +992,6 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: text }),
-            signal: signal,
           });
           const data = await res.json();
 
@@ -1060,11 +1033,7 @@
           });
         } catch (err) {
           hideTyping();
-          if (err.name === "AbortError") {
-            appendBubble("Generation stopped.", "them", "ai");
-          } else {
-            appendBubble("Sorry, there was an error communicating with the server.", "them", "ai");
-          }
+          appendBubble("Sorry, there was an error communicating with the server.", "them", "ai");
           resetSendBtn();
         }
       }

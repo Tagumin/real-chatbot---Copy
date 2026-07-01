@@ -1,0 +1,66 @@
+{
+  "queries": [
+    "What is Galungan?",
+    "When does Nyepi happen?",
+    "What should tourists wear to enter a Balinese temple?",
+    "What is a penjor?",
+    "What happens during the Day of Silence?",
+    "What is Melasti?",
+    "Why do Balinese cremate their dead?",
+    "What is the Ogoh-Ogoh parade?",
+    "Who is the goddess Saraswati?",
+    "When should tourists stay inside their hotel?",
+    "What is a Canang Sari offering?",
+    "Where do Melasti processions go?",
+    "Why can't I touch someone's head in Bali?",
+    "How long does Nyepi last?",
+    "What is Ngaben?",
+    "Who enforces the rules during Nyepi?",
+    "Why is the left hand considered impolite?",
+    "What is Kuningan?",
+    "When is Tumpek Kandang celebrated?",
+    "What is the difference between Galungan and Kuningan?",
+    "Why is Mount Agung considered sacred?",
+    "What is Pagerwesi?",
+    "How do Balinese honor their ancestors?",
+    "Who can attend a Balinese cremation ceremony?",
+    "What offerings are made during Saraswati Day?"
+  ],
+  "relevance": {
+    "What is Galungan?": ["ceremony_1"],
+    "When does Nyepi happen?": ["ceremony_3"],
+    "What should tourists wear to enter a Balinese temple?": [
+      "ceremony_7",
+      "taboo_2"
+    ],
+    "What is a penjor?": ["ceremony_1"],
+    "What happens during the Day of Silence?": ["ceremony_3"],
+    "What is Melasti?": ["ceremony_4"],
+    "Why do Balinese cremate their dead?": ["ceremony_8"],
+    "What is the Ogoh-Ogoh parade?": ["ceremony_19", "ceremony_3"],
+    "Who is the goddess Saraswati?": ["ceremony_5"],
+    "When should tourists stay inside their hotel?": ["ceremony_3", "taboo_31"],
+    "What is a Canang Sari offering?": ["ceremony_7", "taboo_11"],
+    "Where do Melasti processions go?": ["ceremony_4"],
+    "Why can't I touch someone's head in Bali?": ["taboo_21"],
+    "How long does Nyepi last?": ["ceremony_3"],
+    "What is Ngaben?": ["ceremony_8"],
+    "Who enforces the rules during Nyepi?": ["ceremony_3", "taboo_33"],
+    "Why is the left hand considered impolite?": ["taboo_23"],
+    "What is Kuningan?": ["ceremony_2"],
+    "When is Tumpek Kandang celebrated?": ["ceremony_20"],
+    "What is the difference between Galungan and Kuningan?": [
+      "ceremony_1",
+      "ceremony_2"
+    ],
+    "Why is Mount Agung considered sacred?": ["ceremony_4", "taboo_13"],
+    "What is Pagerwesi?": ["ceremony_6"],
+    "How do Balinese honor their ancestors?": [
+      "ceremony_10",
+      "ceremony_8",
+      "ceremony_9"
+    ],
+    "Who can attend a Balinese cremation ceremony?": ["ceremony_8"],
+    "What offerings are made during Saraswati Day?": ["ceremony_5"]
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "queries": [
+    "What is the minimum age for a child to be held criminally liable?",
+    "Who is considered a 'Child' under the Penal Code?",
+    "What are the five main types of principal sentences a judge can impose?",
+    "How many years of probation are mandatory for capital punishment?",
+    "Why is capital punishment treated as a special sentence rather than a principal one?",
+    "Until when can a criminal complaint be withdrawn by the victim?",
+    "Who has the right to file a complaint if a victim is under 16 years old?",
+    "How is the term 'Person' defined in the Penal Code?",
+    "What items are categorized as 'Goods' under the law?",
+    "What is the maximum imprisonment for standard murder?",
+    "How is the sentence affected if a person kills their own parent or spouse?",
+    "What defines a 'Corporation' according to Indonesian law?",
+    "What is the penalty for forging a passport or travel document?",
+    "What are the core purposes of sentencing a convict?",
+    "How long is the time limit to file a complaint for someone living outside Indonesia?",
+    "What is the maximum penalty for selling intoxicating drinks to a child?",
+    "Who is liable for crimes committed on behalf of a corporation?",
+    "What are the specific types of 'additional sentences' a judge can order?",
+    "How is a convict's prison term calculated if they escape?",
+    "When does the authority to prosecute a serious crime like murder expire?",
+    "What is the penalty for insulting the honor of the President in public?",
+    "Why must a judge prioritize justice over legal certainty if they conflict?",
+    "What happens to a child under 12 who is suspected of a crime?",
+    "How does pre-trial detention affect the total prison term?",
+    "What is the maximum sentence for facilitating sexual acts with a child?"
+  ],
+  "relevance": {
+    "What is the minimum age for a child to be held criminally liable?": [
+      "penal_Article_40"
+    ],
+    "Who is considered a 'Child' under the Penal Code?": ["penal_Article_150"],
+    "What are the five main types of principal sentences a judge can impose?": [
+      "penal_Article_65"
+    ],
+    "How many years of probation are mandatory for capital punishment?": [
+      "penal_Article_100"
+    ],
+    "Why is capital punishment treated as a special sentence rather than a principal one?": [
+      "penal_Article_67",
+      "penal_Article_98"
+    ],
+    "Until when can a complaint for a crime be withdrawn?": [
+      "penal_Article_57"
+    ],
+    "Who has the right to file a complaint if a victim is under 16 years old?": [
+      "penal_Article_25"
+    ],
+    "How is the term 'Person' defined in the Penal Code?": [
+      "penal_Article_145"
+    ],
+    "What items are categorized as 'Goods' under the law?": [
+      "penal_Article_147"
+    ],
+    "What is the maximum imprisonment for standard murder?": [
+      "penal_Article_458"
+    ],
+    "How is the sentence affected if a person kills their own parent or spouse?": [
+      "penal_Article_458"
+    ],
+    "What defines a 'Corporation' according to Indonesian law?": [
+      "penal_Article_45",
+      "penal_Article_146"
+    ],
+    "What is the penalty for forging a passport or travel document?": [
+      "penal_Article_398"
+    ],
+    "What are the core purposes of sentencing a convict?": ["penal_Article_51"],
+    "How long is the time limit to file a complaint for someone living outside Indonesia?": [
+      "penal_Article_29"
+    ],
+    "What is the maximum penalty for selling intoxicating drinks to a child?": [
+      "penal_Article_424"
+    ],
+    "Who is liable for crimes committed on behalf of a corporation?": [
+      "penal_Article_47",
+      "penal_Article_49"
+    ],
+    "What are the specific types of 'additional sentences' a judge can order?": [
+      "penal_Article_66"
+    ],
+    "How is a convict's prison term calculated if they escape?": [
+      "penal_Article_63"
+    ],
+    "When does the authority to prosecute a serious crime like murder expire?": [
+      "penal_Article_136"
+    ],
+    "What is the penalty for insulting the honor of the President in public?": [
+      "penal_Article_218"
+    ],
+    "Why must a judge prioritize justice over legal certainty if they conflict?": [
+      "penal_Article_53"
+    ],
+    "What happens to a child under 12 who is suspected of a crime?": [
+      "penal_Article_41"
+    ],
+    "How does pre-trial detention affect the total prison term?": [
+      "penal_Article_61"
+    ],
+    "What is the maximum sentence for facilitating sexual acts with a child?": [
+      "penal_Article_419",
+      "penal_Article_422"
+    ]
+  }
+}
